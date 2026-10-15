@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, User, Briefcase, FileText, Calendar, Bell, LogOut, Award, FolderOpen, BookOpen, FileCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import notificationService from '../services/notificationService';
-import { useState, useEffect } from 'react';
 
 const StudentLayout = () => {
   const location = useLocation();
@@ -27,7 +26,6 @@ const StudentLayout = () => {
     { path: '/student/jobs', label: 'Job Search', icon: Briefcase },
     { path: '/student/applications', label: 'Applications', icon: FileText },
     { path: '/student/interviews', label: 'Interviews', icon: Calendar },
-    { path: '/student/notifications', label: 'Notifications', icon: Bell },
   ];
 
   const handleLogout = () => {
@@ -40,30 +38,33 @@ const StudentLayout = () => {
     : 'S';
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r flex flex-col hidden md:flex">
-        <div className="p-6">
-          <div className="text-2xl font-bold text-blue-600 flex items-center gap-2">
-            <Briefcase className="w-6 h-6" /> CareerFlow
+    <div className="flex h-screen bg-transparent">
+      {/* Sidebar - Dark Navy */}
+      <aside className="w-64 bg-[#0f172a] text-slate-300 flex flex-col hidden md:flex shadow-xl z-20">
+        <div className="p-6 border-b border-slate-700/50">
+          <div className="text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+            <div className="bg-indigo-500 p-1.5 rounded-lg">
+              <Briefcase className="w-5 h-5 text-white" />
+            </div>
+            CareerFlow
           </div>
         </div>
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname.startsWith(item.path);
             return (
-              <Link key={item.path} to={item.path} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>
-                <Icon className="w-5 h-5" />
+              <Link key={item.path} to={item.path} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive ? 'bg-indigo-500/10 text-indigo-400 shadow-sm' : 'hover:bg-slate-800/50 hover:text-white'}`}>
+                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-slate-700/50">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 rounded-xl transition-colors"
           >
             <LogOut className="w-5 h-5" /> Logout
           </button>
@@ -71,28 +72,28 @@ const StudentLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Topbar */}
-        <header className="h-16 bg-white border-b flex items-center justify-between px-6">
-          <div className="md:hidden text-xl font-bold text-blue-600">CareerFlow</div>
-          <div className="flex items-center gap-4 ml-auto">
-            <Link to="/student/notifications" className="p-2 text-gray-500 hover:bg-gray-100 rounded-full relative">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+        {/* Topbar - Clean White */}
+        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
+          <div className="md:hidden text-xl font-black text-indigo-600">CareerFlow</div>
+          <div className="flex items-center gap-6 ml-auto">
+            <Link to="/student/notifications" className="p-2.5 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 rounded-full relative transition-colors shadow-sm bg-white border border-slate-100">
               <Bell className="w-5 h-5" />
-              {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
+              {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md border-2 border-white">{unreadCount}</span>}
             </Link>
-            <div className="flex items-center gap-3 pl-4 border-l">
-              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
+            <div className="flex items-center gap-3 pl-6 border-l border-slate-200 cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-md border-2 border-white">
                 {initials}
               </div>
               <div className="text-sm hidden sm:block">
-                <p className="font-medium text-gray-700">{user?.name || 'Student'}</p>
-                <p className="text-gray-500 text-xs">Student</p>
+                <p className="font-bold text-slate-800">{user?.name || 'Student'}</p>
+                <p className="text-slate-500 text-xs font-medium">Student Account</p>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-8">
           <Outlet />
         </main>
       </div>

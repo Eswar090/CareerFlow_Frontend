@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Briefcase, Eye, EyeOff } from 'lucide-react';
+import { Briefcase, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 const getErrorMessage = (error) => {
-  if (!error.response) {
-    return 'Unable to connect to CareerFlow server. Please try again.';
+  if (!error.response || error.code === 'ERR_NETWORK') {
+    return 'Unable to connect to CareerFlow server. Please check whether the server is running.';
   }
   const status = error.response?.status;
-  const message = error.response?.data?.message || error.response?.data;
+  const data = error.response?.data;
+  const message = data?.message || (typeof data === 'string' ? data : null);
   if (status === 409) return 'An account with this email already exists. Please login.';
   if (status === 400) {
     if (typeof message === 'string' && message.length < 200) return message;
     return 'Invalid registration details. Please check your input.';
   }
+  if (status >= 500) return 'Something went wrong. Please try again later.';
   if (typeof message === 'string' && message.length < 200) return message;
   return 'Registration failed. Please try again.';
 };
@@ -76,127 +78,151 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full border border-gray-100">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Briefcase className="w-7 h-7 text-blue-600" />
-          <span className="text-2xl font-bold text-blue-600">CareerFlow</span>
+    <div className="min-h-screen flex bg-slate-50">
+      {/* Left Column - Image/Gradient */}
+      <div className="hidden lg:block relative w-0 flex-1 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 via-indigo-600 to-blue-700">
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full px-12">
+            <h1 className="text-4xl font-bold text-white mb-6 leading-tight">Join the Network of<br/>Professionals</h1>
+            <p className="text-indigo-100 text-lg mx-auto max-w-lg">Create your profile, discover tailored opportunities, and take the next big step in your career.</p>
+          </div>
+          {/* Decorative circles */}
+          <div className="absolute top-24 left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-24 right-24 w-96 h-96 bg-indigo-400/30 rounded-full blur-3xl"></div>
         </div>
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-1">Create an Account</h2>
-        <p className="text-center text-gray-500 text-sm mb-6">Join CareerFlow to get started</p>
+      </div>
 
-        {/* Error Banner */}
-        {error && (
-          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
+      {/* Right Column - Form */}
+      <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-20 xl:px-24 py-12 overflow-y-auto">
+        <div className="mx-auto w-full max-w-sm lg:w-96">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-600/20">
+              <Briefcase className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-3xl font-black text-slate-900 tracking-tight">CareerFlow</span>
           </div>
-        )}
+          
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">Create an Account</h2>
+          <p className="text-slate-500 text-sm mb-8">Join CareerFlow to get started on your journey</p>
 
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
-              placeholder="John Doe"
-            />
-          </div>
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-6 px-4 py-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm font-medium flex items-start gap-2">
+              <span className="block mt-0.5">⚠️</span>
+              {error}
+            </div>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <div className="relative">
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name</label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
+                type="text"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
-                placeholder="Min. 8 characters"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400 bg-white"
+                placeholder="John Doe"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-            <div className="relative">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email Address</label>
               <input
-                type={showConfirm ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 required
                 disabled={loading}
-                className="w-full px-4 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
-                placeholder="••••••••"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400 bg-white"
+                placeholder="you@example.com"
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                tabIndex={-1}
-              >
-                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">I am a</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  className="w-full px-4 py-3 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400 bg-white"
+                  placeholder="Min. 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Confirm Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  className="w-full px-4 py-3 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400 bg-white"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">I am a</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                disabled={loading}
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400 bg-white appearance-none cursor-pointer"
+              >
+                <option value="STUDENT">Student / Job Seeker</option>
+                <option value="RECRUITER">Recruiter / Company</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
               disabled={loading}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+              className="w-full bg-indigo-600 text-white font-semibold py-3.5 rounded-xl hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 mt-6"
             >
-              <option value="STUDENT">Student / Job Seeker</option>
-              <option value="RECRUITER">Recruiter / Company</option>
-            </select>
-          </div>
+              {loading ? 'Creating account...' : (
+                <>
+                  Register <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-4"
-          >
-            {loading ? 'Creating account...' : 'Register'}
-          </button>
-        </form>
-
-        <p className="text-center mt-6 text-gray-600 text-sm">
-          Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 font-medium hover:underline">Login</Link>
-        </p>
+          <p className="text-center mt-8 text-slate-600 text-sm font-medium">
+            Already have an account?{' '}
+            <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Sign in here</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
