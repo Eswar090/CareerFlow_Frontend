@@ -11,6 +11,22 @@ const recruiterService = {
     return response.data;
   },
 
+  uploadProfilePicture: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/recruiters/me/profile-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  deleteProfilePicture: async () => {
+    const response = await api.delete('/recruiters/me/profile-picture');
+    return response.data;
+  },
+
   getCompany: async () => {
     const response = await api.get('/recruiters/me/company');
     return response.data;
@@ -39,4 +55,3 @@ const recruiterService = {
 };
 
 export default recruiterService;
-

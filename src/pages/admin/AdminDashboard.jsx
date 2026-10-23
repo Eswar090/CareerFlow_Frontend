@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Building, Briefcase, FileText, Calendar, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { 
+  Users, Building, Briefcase, FileText, Calendar, 
+  TrendingUp, ShieldCheck, Award, ArrowRight, Layers
+} from 'lucide-react';
 import adminService from '../../services/adminService';
 import analyticsService from '../../services/analyticsService';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
-const StatCard = ({ title, value, icon: Icon, colorClass }) => (
-  <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
-    <div className={`p-4 rounded-lg ${colorClass}`}>
-      <Icon className="w-6 h-6" />
-    </div>
-    <div>
-      <p className="text-sm text-gray-500 font-medium">{title}</p>
-      <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
+const StatCard = ({ title, value, icon: Icon, gradientClass }) => (
+  <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 relative overflow-hidden group hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-300">
+    <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradientClass} opacity-10 rounded-bl-full -mr-6 -mt-6 transition-transform group-hover:scale-125`}></div>
+    <div className="flex items-center justify-between relative z-10">
+      <div className="space-y-1">
+        <p className="text-[11px] text-slate-400 font-extrabold uppercase tracking-wider">{title}</p>
+        <h3 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h3>
+      </div>
+      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${gradientClass} text-white shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+        <Icon className="w-6 h-6" />
+      </div>
     </div>
   </div>
 );
 
-const COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#64748b', '#06b6d4'];
+const COLORS = ['#6366f1', '#10b981', '#8b5cf6', '#06b6d4', '#f59e0b', '#f43f5e', '#64748b'];
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -46,15 +53,15 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+      <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl text-sm font-semibold">
         {error}
       </div>
     );
@@ -66,71 +73,185 @@ const AdminDashboard = () => {
   const appStatusData = analytics?.applicationStatusDistribution?.map(d => ({ name: d.status, value: d.count })) || [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Platform Analytics</h1>
-        <p className="text-gray-500 mt-1">Overview of the CareerFlow platform activity and metrics.</p>
+    <div className="space-y-8 max-w-7xl mx-auto pb-12 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            <ShieldCheck className="w-8 h-8 text-violet-600" />
+            Platform Governance & Analytics
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Real-time telemetry, user distribution, and institutional recruitment metrics.
+          </p>
+        </div>
+
+        <Link 
+          to="/admin/placement-drives" 
+          className="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 self-start"
+        >
+          <Award className="w-4 h-4" />
+          Campus Placement Drives
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard title="Total Users" value={stats?.totalUsers || 0} icon={Users} colorClass="bg-blue-50 text-blue-600" />
-        <StatCard title="Students" value={stats?.totalStudents || 0} icon={Users} colorClass="bg-indigo-50 text-indigo-600" />
-        <StatCard title="Companies" value={stats?.totalCompanies || 0} icon={Building} colorClass="bg-purple-50 text-purple-600" />
-        <StatCard title="Active Jobs" value={stats?.totalActiveJobs || 0} icon={Briefcase} colorClass="bg-green-50 text-green-600" />
-        <StatCard title="Applications" value={stats?.totalApplications || 0} icon={FileText} colorClass="bg-yellow-50 text-yellow-600" />
-        <StatCard title="Interviews" value={stats?.totalInterviews || 0} icon={Calendar} colorClass="bg-pink-50 text-pink-600" />
+      {/* Stat Cards 6-Column Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <StatCard 
+          title="Total Users" 
+          value={stats?.totalUsers || 0} 
+          icon={Users} 
+          gradientClass="from-blue-600 to-indigo-600" 
+        />
+        <StatCard 
+          title="Students" 
+          value={stats?.totalStudents || 0} 
+          icon={Users} 
+          gradientClass="from-indigo-600 to-violet-600" 
+        />
+        <StatCard 
+          title="Companies" 
+          value={stats?.totalCompanies || 0} 
+          icon={Building} 
+          gradientClass="from-violet-600 to-purple-600" 
+        />
+        <StatCard 
+          title="Active Jobs" 
+          value={stats?.totalActiveJobs || 0} 
+          icon={Briefcase} 
+          gradientClass="from-emerald-500 to-teal-600" 
+        />
+        <StatCard 
+          title="Applications" 
+          value={stats?.totalApplications || 0} 
+          icon={FileText} 
+          gradientClass="from-cyan-600 to-blue-600" 
+        />
+        <StatCard 
+          title="Interviews" 
+          value={stats?.totalInterviews || 0} 
+          icon={Calendar} 
+          gradientClass="from-amber-500 to-orange-600" 
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
         {/* User Distribution Chart */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">User Roles Distribution</h2>
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 p-6 sm:p-8">
+          <h2 className="text-lg font-black text-slate-900 tracking-tight mb-1">User Roles Ratio</h2>
+          <p className="text-xs text-slate-400 mb-6">Distribution between Students, Recruiters, and Administrators.</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={userRoleData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                  {userRoleData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                <Pie 
+                  data={userRoleData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={60} 
+                  outerRadius={85} 
+                  paddingAngle={5} 
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {userRoleData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip 
+                  contentStyle={{ 
+                    borderRadius: '16px', 
+                    backgroundColor: '#0f172a', 
+                    color: '#ffffff', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)' 
+                  }}
+                  itemStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '15px', fontSize: '12px' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Job Status Chart */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Job Status Distribution</h2>
+        {/* Job Status Distribution */}
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 p-6 sm:p-8">
+          <h2 className="text-lg font-black text-slate-900 tracking-tight mb-1">Job Status Distribution</h2>
+          <p className="text-xs text-slate-400 mb-6">Active vs Draft vs Closed postings on the platform.</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={jobStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                  {jobStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />)}
+                <Pie 
+                  data={jobStatusData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={60} 
+                  outerRadius={85} 
+                  paddingAngle={5} 
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {jobStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                  ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip 
+                  contentStyle={{ 
+                    borderRadius: '16px', 
+                    backgroundColor: '#0f172a', 
+                    color: '#ffffff', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)' 
+                  }}
+                  itemStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '15px', fontSize: '12px' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Application Status Chart */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Application Status Overview</h2>
+        {/* Application Funnel Chart */}
+        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 p-6 sm:p-8">
+          <h2 className="text-lg font-black text-slate-900 tracking-tight mb-1">Global Application Pipeline Volume</h2>
+          <p className="text-xs text-slate-400 mb-6">Total candidates currently in each recruitment stage.</p>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={appStatusData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: '#f3f4f6' }} />
-                <Bar dataKey="value" name="Applications" radius={[4, 4, 0, 0]}>
-                  {appStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[(index + 1) % COLORS.length]} />)}
+              <BarChart data={appStatusData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 11, fill: '#64748b', fontWeight: 600 }} 
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 11, fill: '#64748b' }} 
+                />
+                <Tooltip 
+                  cursor={{ fill: '#f8fafc' }} 
+                  contentStyle={{ 
+                    borderRadius: '16px', 
+                    backgroundColor: '#0f172a', 
+                    color: '#ffffff', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)' 
+                  }}
+                  itemStyle={{ color: '#ffffff', fontWeight: 'bold' }}
+                />
+                <Bar dataKey="value" name="Candidates" radius={[8, 8, 0, 0]}>
+                  {appStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[(index + 1) % COLORS.length]} />
+                  ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
+
       </div>
     </div>
   );
